@@ -5,6 +5,6 @@ Hello, weary traveller. You have stumbled upon the source code of **Subterra**, 
 
 Fabric:
 - 1.21
-- 
+
 **Features**:
 - tba
