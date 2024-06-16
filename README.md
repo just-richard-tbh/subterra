@@ -7,4 +7,10 @@ Fabric:
 - 1.21
 
 **Features**:
+- a non-functional aloy furnace
 - tba
+
+**TODO:**
+[] add alloy furnace functionality
+[] make alloy recipes data-driven
+[] much, much more
