@@ -1,0 +1,26 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "minecraft:block/cube_column",
+	"render_type": "solid",
+	"textures": {
+		"0": "subterra:block/mossy_deepslate_rotated",
+		"2": "subterra:block/mossy_deepslate_top",
+		"3": "subterra:block/mossy_deepslate_rotated_front",
+		"4": "subterra:block/mossy_deepslate_rotated_bottom",
+		"particle": "subterra:block/mossy_deepslate_rotated"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "#3"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "#3"},
+				"up": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#2"},
+				"down": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#4"}
+			}
+		}
+	]
+}

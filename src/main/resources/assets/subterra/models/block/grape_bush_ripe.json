@@ -1,0 +1,8 @@
+{
+	"parent": "subterra:block/big_bush.json",
+	"textures": {
+		"0": "subterra:block/grape_bush_ripe",
+		"1": "subterra:block/grape_leaves_ripe",
+		"particle": "subterra:block/grape_bush_ripe"
+	}
+}

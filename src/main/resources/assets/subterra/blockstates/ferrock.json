@@ -1,0 +1,62 @@
+{
+  "variants": {
+    "axis=x": [
+      {
+        "model": "subterra:block/ferrock",
+        "x": 90,
+        "y": 90
+      },
+      {
+        "model": "subterra:block/ferrock",
+        "x": 90,
+        "y": 90
+      },
+      {
+        "model": "subterra:block/ferrock",
+        "x": 90,
+        "y": 90
+      },
+      {
+        "model": "subterra:block/ferrock",
+        "x": 90,
+        "y": 90
+      }
+    ],
+    "axis=y": [
+      {
+        "model": "subterra:block/ferrock"
+      },
+      {
+        "model": "subterra:block/ferrock"
+      },
+      {
+        "model": "subterra:block/ferrock",
+        "y": 180
+      },
+      {
+        "model": "subterra:block/ferrock",
+        "y": 180
+      }
+    ],
+    "axis=z": [
+      {
+        "model": "subterra:block/ferrock",
+        "x": 90
+      },
+      {
+        "model": "subterra:block/ferrock",
+        "x": 90
+      },
+      {
+        "model": "subterra:block/ferrock",
+        "x": 90,
+        "y": 180
+      },
+      {
+        "model": "subterra:block/ferrock",
+        "x": 90,
+        "y": 180
+      }
+    ]
+  }
+}

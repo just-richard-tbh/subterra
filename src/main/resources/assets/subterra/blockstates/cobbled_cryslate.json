@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "all": {
+      "model": "subterra:block/cobbled_cryslate"
+    }
+  }
+}

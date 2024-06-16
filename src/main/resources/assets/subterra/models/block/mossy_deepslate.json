@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "vpp:block/uranium_ore",
+    "up": "vpp:block/uranium_ore",
+    "north": "vpp:block/uranium_ore",
+    "east": "vpp:block/uranium_ore",
+    "south": "vpp:block/uranium_ore",
+    "west": "vpp:block/uranium_ore",
+    "particle": "vpp:block/uranium_ore"
+  },
+  "render_type": "solid"
+}
