@@ -11,6 +11,6 @@ Fabric:
 - tba
 
 **TODO:**
-[] add alloy furnace functionality
-[] make alloy recipes data-driven
-[] much, much more
+- [] add alloy furnace functionality
+- [] make alloy recipes data-driven
+- [] much, much more
