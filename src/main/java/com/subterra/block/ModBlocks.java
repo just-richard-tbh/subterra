@@ -5,6 +5,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 
 import static net.minecraft.block.Blocks.createLightLevelFromLitBlockState;
@@ -17,7 +18,8 @@ public class ModBlocks {
                     mapColor(MapColor.DEEPSLATE_GRAY).
                     requiresTool().
                     strength(3.5F).
-                    luminance(createLightLevelFromLitBlockState(13))
+                    luminance(createLightLevelFromLitBlockState(13)).
+                    sounds(BlockSoundGroup.DEEPSLATE_TILES)
     );
 
     public static void registerModBlocks(){

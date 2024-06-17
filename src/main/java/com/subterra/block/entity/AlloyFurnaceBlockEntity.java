@@ -20,7 +20,24 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity implements NamedScreenHandlerFactory, ImplementedInventory, SidedInventory {
+public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
+        implements NamedScreenHandlerFactory,
+        ImplementedInventory,
+        SidedInventory {
+    protected static final int INPUT1_SLOT_INDEX = 0;
+    protected static final int INPUT2_SLOT_INDEX = 1;
+    protected static final int FUEL_SLOT_INDEX = 2;
+    protected static final int OUTPUT_SLOT_INDEX = 3;
+    public static final int BURN_TIME_PROPERTY_INDEX = 0;
+    private static final int[] TOP_SLOTS = new int[]{0};
+    private static final int[] BOTTOM_SLOTS = new int[]{3};
+    private static final int[] NE_SLOTS = new int[]{1};
+    private static final int[] SW_SLOTS = new int[]{2};
+    public static final int FUEL_TIME_PROPERTY_INDEX = 1;
+    public static final int COOK_TIME_PROPERTY_INDEX = 2;
+    public static final int COOK_TIME_TOTAL_PROPERTY_INDEX = 3;
+    public static final int PROPERTY_COUNT = 4;
+    public static final int DEFAULT_COOK_TIME = 200;
     private DefaultedList<ItemStack> inventory;
 
     public AlloyFurnaceBlockEntity(BlockPos pos, BlockState state){
@@ -88,22 +105,32 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity implem
 
     @Override
     public int[] getAvailableSlots(Direction side) {
-        if (side == Direction.DOWN) {
-            return BOTTOM_SLOTS;
+        switch(side){
+            case Direction.UP -> {
+                return TOP_SLOTS;
+            }
+            case Direction.NORTH, Direction.EAST -> {
+                return NE_SLOTS;
+            }
+            case Direction.SOUTH, Direction.WEST -> {
+                return SW_SLOTS;
+            }
+            case Direction.DOWN -> {
+                return BOTTOM_SLOTS;
+            }
+            default -> {
+                return null;
+            }
         }
-        if (side == Direction.UP) {
-            return TOP_SLOTS;
-        }
-        return SIDE_SLOTS;
     }
 
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return false;
+        return dir != Direction.DOWN;
     }
 
     @Override
     public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-        return false;
+        return dir == Direction.DOWN;
     }
 }
