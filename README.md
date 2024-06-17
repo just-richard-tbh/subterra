@@ -1,4 +1,4 @@
-Hello, weary traveller. You have stumbled upon the source code of **Subterra**, a modification for the populat voxel sandbox game, Minecraft.
+Hello, weary traveller. You have stumbled upon the source code of **Subterra**, a modification for the popular voxel sandbox game, Minecraft.
 
 
 **Versions supported**:
