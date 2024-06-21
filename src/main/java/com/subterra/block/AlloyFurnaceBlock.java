@@ -84,9 +84,13 @@ public class AlloyFurnaceBlock extends BlockWithEntity implements BlockEntityPro
     }
 
     @Nullable
+    protected static <T extends BlockEntity> BlockEntityTicker<T> validateTicker(World world, BlockEntityType<T> givenType, BlockEntityType<? extends AlloyFurnaceBlockEntity> expectedType) {
+        return world.isClient ? null : AbstractFurnaceBlock.validateTicker(givenType, expectedType, AlloyFurnaceBlockEntity::tick);
+    }
+
+    @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        if (type != ModBlockEntities.ALLOY_FURNACE_BLOCK_ENTITY) return null;
-        return AlloyFurnaceBlockEntity::tick;
+        return AlloyFurnaceBlock.validateTicker(world, type, ModBlockEntities.ALLOY_FURNACE_BLOCK_ENTITY);
     }
 }

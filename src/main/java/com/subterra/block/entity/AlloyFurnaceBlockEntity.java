@@ -1,24 +1,39 @@
 package com.subterra.block.entity;
 
+import com.google.common.collect.Maps;
 import com.subterra.screen.AlloyFurnaceScreenHandler;
+import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
+import net.minecraft.util.Pair;
+import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.helpers.FormattingTuple;
+
+import java.util.*;
+
+import static com.subterra.block.AlloyFurnaceBlock.LIT;
 
 public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
         implements NamedScreenHandlerFactory,
@@ -30,7 +45,7 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
     protected static final int OUTPUT_SLOT_INDEX = 3;
     public static final int BURN_TIME_PROPERTY_INDEX = 0;
     private static final int[] TOP_SLOTS = new int[]{0};
-    private static final int[] BOTTOM_SLOTS = new int[]{3};
+    private static final int[] BOTTOM_SLOTS = new int[]{3,2};
     private static final int[] NE_SLOTS = new int[]{1};
     private static final int[] SW_SLOTS = new int[]{2};
     public static final int FUEL_TIME_PROPERTY_INDEX = 1;
@@ -38,7 +53,52 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
     public static final int COOK_TIME_TOTAL_PROPERTY_INDEX = 3;
     public static final int PROPERTY_COUNT = 4;
     public static final int DEFAULT_COOK_TIME = 200;
+    int currentFuel;
+    int maxFuel;
+    int currentProgress;
+    int maxProgress;
     private DefaultedList<ItemStack> inventory;
+
+    protected final PropertyDelegate propertyDelegate = new PropertyDelegate(){
+
+        @Override
+        public int get(int index) {
+            return switch (index) {
+                case 0 -> AlloyFurnaceBlockEntity.this.currentFuel;
+                case 1 -> AlloyFurnaceBlockEntity.this.maxFuel;
+                case 2 -> AlloyFurnaceBlockEntity.this.currentProgress;
+                case 3 -> AlloyFurnaceBlockEntity.this.maxProgress;
+                default -> 0;
+            };
+        }
+
+        @Override
+        public void set(int index, int value) {
+            switch (index) {
+                case 0: {
+                    AlloyFurnaceBlockEntity.this.currentFuel = value;
+                    break;
+                }
+                case 1: {
+                    AlloyFurnaceBlockEntity.this.maxFuel = value;
+                    break;
+                }
+                case 2: {
+                    AlloyFurnaceBlockEntity.this.currentProgress = value;
+                    break;
+                }
+                case 3: {
+                    AlloyFurnaceBlockEntity.this.maxProgress = value;
+                    break;
+                }
+            }
+        }
+
+        @Override
+        public int size() {
+            return 4;
+        }
+    };
 
     public AlloyFurnaceBlockEntity(BlockPos pos, BlockState state){
         super(ModBlockEntities.ALLOY_FURNACE_BLOCK_ENTITY, pos, state);
@@ -99,10 +159,6 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
         return 4;
     }
 
-    public static <T extends BlockEntity> void tick(World world, BlockPos blockPos, BlockState state, T t) {
-
-    }
-
     @Override
     public int[] getAvailableSlots(Direction side) {
         switch(side){
@@ -132,5 +188,54 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
     @Override
     public boolean canExtract(int slot, ItemStack stack, Direction dir) {
         return dir == Direction.DOWN;
+    }
+
+    private boolean isBurning() {
+        return this.currentFuel > 0;
+    }
+    private boolean hasValidRecipe(){
+        DefaultedList<ItemStack> inventory = this.inventory;
+        return (inventory.get(0).isOf(Items.IRON_INGOT) && inventory.get(1).isOf(Items.COAL)) || (inventory.get(1).isOf(Items.IRON_INGOT) && inventory.get(0).isOf(Items.COAL));
+    }
+
+    public static volatile Map<Item, Integer> fuelTimeMap;
+    public Map<Item, Integer> createFuelTimeMap() {
+        Map<Item, Integer> map = fuelTimeMap;
+        if (map!=null){
+            return map;
+        }
+        LinkedHashMap<Item, Integer> map2 = Maps.newLinkedHashMap();
+        AlloyFurnaceBlockEntity.addFuel(map2, Items.COAL, 800);
+        AlloyFurnaceBlockEntity.addFuel(map2, Items.CHARCOAL, 800);
+        AlloyFurnaceBlockEntity.addFuel(map2, Items.BLAZE_ROD, 400);
+        return map2;
+    }
+    private static boolean isNonFlammableWood(Item item) {
+        return item.getRegistryEntry().isIn(ItemTags.NON_FLAMMABLE_WOOD);
+    }
+
+    private static void addFuel(Map<Item, Integer> maxFuels, ItemConvertible item, int maxFuel) {
+        Item item2 = item.asItem();
+        if (AlloyFurnaceBlockEntity.isNonFlammableWood(item2)) {
+            if (SharedConstants.isDevelopment) {
+                throw Util.throwOrPause(new IllegalStateException("A developer tried to explicitly make fire resistant item " + item2.getName(null).getString() + " a furnace fuel. That will not work!"));
+            }
+            return;
+        }
+        maxFuels.put(item2, maxFuel);
+    }
+
+    private static void createRecipes(Map<Pair<Item, Item>, Item> recipes){
+
+    }
+
+    public static void tick(World world, BlockPos blockPos, BlockState state, AlloyFurnaceBlockEntity blockEntity) {
+        if(blockEntity.hasValidRecipe()){
+            blockEntity.inventory.set(2, Items.BOW.getDefaultStack());
+        }
+        if(blockEntity.isBurning()){
+            --blockEntity.currentFuel;
+            world.setBlockState(blockPos, state.with(LIT, true));
+        }
     }
 }

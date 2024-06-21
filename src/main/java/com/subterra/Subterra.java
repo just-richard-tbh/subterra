@@ -2,6 +2,7 @@ package com.subterra;
 
 import com.subterra.block.ModBlocks;
 import com.subterra.block.entity.ModBlockEntities;
+//import com.subterra.recipe.ModRecipes;
 import com.subterra.screen.ModScreenHandlers;
 import net.fabricmc.api.ModInitializer;
 
@@ -26,6 +27,7 @@ public class Subterra implements ModInitializer {
 		ModBlocks.registerModBlocks();
 		ModBlockEntities.registerBlockEntityTypes();
 		ModScreenHandlers.registerModScreenHandlers();
+		//ModRecipes.registerRecipes();
 
 		Registry.register(Registries.ITEM_GROUP, Identifier.of("subterra", "subterra"),
 				FabricItemGroup.builder().displayName(Text.translatable("itemgroup.subterra"))
