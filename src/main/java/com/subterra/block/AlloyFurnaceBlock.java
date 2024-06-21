@@ -73,7 +73,6 @@ public class AlloyFurnaceBlock extends BlockWithEntity implements BlockEntityPro
                 player.openHandledScreen(screenHandlerFactory);
             }
         }
-
         return ActionResult.SUCCESS;
     }
 

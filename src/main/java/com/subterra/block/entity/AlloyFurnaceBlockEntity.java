@@ -5,7 +5,6 @@ import com.subterra.screen.AlloyFurnaceScreenHandler;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -22,14 +21,13 @@ import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
 import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.helpers.FormattingTuple;
+import oshi.util.tuples.Pair;
 
 import java.util.*;
 
@@ -193,10 +191,6 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
     private boolean isBurning() {
         return this.currentFuel > 0;
     }
-    private boolean hasValidRecipe(){
-        DefaultedList<ItemStack> inventory = this.inventory;
-        return (inventory.get(0).isOf(Items.IRON_INGOT) && inventory.get(1).isOf(Items.COAL)) || (inventory.get(1).isOf(Items.IRON_INGOT) && inventory.get(0).isOf(Items.COAL));
-    }
 
     public static volatile Map<Item, Integer> fuelTimeMap;
     public Map<Item, Integer> createFuelTimeMap() {
@@ -214,6 +208,14 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
         return item.getRegistryEntry().isIn(ItemTags.NON_FLAMMABLE_WOOD);
     }
 
+    protected int getFuelTime(ItemStack fuel) {
+        if (fuel.isEmpty()) {
+            return 0;
+        }
+        Item item = fuel.getItem();
+        return AbstractFurnaceBlockEntity.createFuelTimeMap().getOrDefault(item, 0);
+    }
+
     private static void addFuel(Map<Item, Integer> maxFuels, ItemConvertible item, int maxFuel) {
         Item item2 = item.asItem();
         if (AlloyFurnaceBlockEntity.isNonFlammableWood(item2)) {
@@ -225,8 +227,43 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
         maxFuels.put(item2, maxFuel);
     }
 
-    private static void createRecipes(Map<Pair<Item, Item>, Item> recipes){
+    public static boolean canUseAsFuel(ItemStack stack) {
+        return AbstractFurnaceBlockEntity.createFuelTimeMap().containsKey(stack.getItem());
+    }
 
+    protected Item getRecipe(ItemStack ingredient1, ItemStack ingredient2) {
+        if (ingredient1.isEmpty() || ingredient2.isEmpty()) {
+            return null;
+        }
+        Vector<Item> itemPair = new Vector<Item>(Arrays.asList(ingredient1.getItem(), ingredient2.getItem()));
+        return AlloyFurnaceBlockEntity.createRecipes().getOrDefault(itemPair, null);
+    }
+
+    private boolean hasValidRecipe(){
+        DefaultedList<ItemStack> inventory = this.inventory;
+        Vector<Item> itemPair = new Vector<Item>(Arrays.asList(inventory.get(0).getItem().asItem(), inventory.get(1).getItem().asItem()));
+        if(AlloyFurnaceBlockEntity.createRecipes().containsKey(itemPair)) {
+            return true;
+        }
+        else {
+            itemPair = new Vector<Item>(Arrays.asList(inventory.get(1).getItem().asItem(), inventory.get(0).getItem().asItem()));
+        }
+        return AlloyFurnaceBlockEntity.createRecipes().containsKey(itemPair);
+    }
+
+    private static void addRecipe(Map<Vector<Item>, Item> recipeA, Vector<Item> ingredients, Item result){
+        recipeA.put(ingredients, result);
+    }
+
+    public static volatile Map<Vector<Item>, Item> recipeMap;
+    public static Map<Vector<Item>, Item> createRecipes(){
+        Map<Vector<Item>, Item> map = recipeMap;
+        if (map!=null){
+            return map;
+        }
+        LinkedHashMap<Vector<Item>, Item> recipeMapNew = Maps.newLinkedHashMap();
+        AlloyFurnaceBlockEntity.addRecipe(recipeMapNew, new Vector<Item>(Arrays.asList(Items.IRON_INGOT, Items.COAL)) , Items.GOLD_INGOT);
+        return recipeMapNew;
     }
 
     public static void tick(World world, BlockPos blockPos, BlockState state, AlloyFurnaceBlockEntity blockEntity) {
@@ -236,6 +273,9 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
         if(blockEntity.isBurning()){
             --blockEntity.currentFuel;
             world.setBlockState(blockPos, state.with(LIT, true));
+        }else {
+           world.setBlockState(blockPos, state.with(LIT, false));
         }
     }
+
 }
