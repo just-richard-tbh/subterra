@@ -51,7 +51,7 @@ public class AlloyFurnaceScreenHandler extends ScreenHandler {
         for(k = 0; k < 9; ++k) {
             this.addSlot(new Slot(playerInventory, k, 8 + k * 18, 142));
         }
-
+        this.addProperties(propertyDelegate);
     }
 
     @Override
@@ -85,12 +85,21 @@ public class AlloyFurnaceScreenHandler extends ScreenHandler {
         return newStack;
     }
 
-    public float getCurrentProgress() {
-        return propertyDelegate.get(2);
+    public float getCookProgress() {
+        int i = this.propertyDelegate.get(2);
+        int j = this.propertyDelegate.get(3);
+        if (j == 0 || i == 0) {
+            return 0.0f;
+        }
+        return MathHelper.clamp((float)i / (float)j, 0.0f, 1.0f);
     }
 
-    public float getCurrentFuel() {
-        return propertyDelegate.get(0);
+    public float getFuelProgress() {
+        int i = this.propertyDelegate.get(1);
+        if (i == 0) {
+            i = 200;
+        }
+        return MathHelper.clamp((float)this.propertyDelegate.get(0) / (float)i, 0.0f, 1.0f);
     }
 
     public boolean isBurning() {

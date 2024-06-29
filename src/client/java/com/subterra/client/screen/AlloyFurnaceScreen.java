@@ -1,9 +1,11 @@
 package com.subterra.client.screen;
 
 import com.subterra.screen.AlloyFurnaceScreenHandler;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.screen.AbstractFurnaceScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -32,6 +34,17 @@ public class AlloyFurnaceScreen extends HandledScreen<AlloyFurnaceScreenHandler>
         int i = this.x;
         int j = this.y;
         drawContext.drawTexture(TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        boolean k;
+        int l;
+        if (((AlloyFurnaceScreenHandler)this.handler).isBurning()) {
+            k = true;
+            l = MathHelper.ceil(((AlloyFurnaceScreenHandler)this.handler).getFuelProgress() * 13.0F) + 1;
+            drawContext.drawGuiTexture(this.LIT_PROGRESS_TEXTURE, 14, 14, 0, 14 - l, i + 56, j + 36 + 14 - l, 14, l);
+        }
+
+        k = true;
+        l = MathHelper.ceil(((AlloyFurnaceScreenHandler)this.handler).getCookProgress() * 24.0F);
+        drawContext.drawGuiTexture(this.BURN_PROGRESS_TEXTRUE, 24, 16, 0, 0, i + 79, j + 34, l, 16);
     }
 
     @Override

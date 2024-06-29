@@ -54,7 +54,7 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
     int currentFuel;
     int maxFuel;
     int currentProgress;
-    int maxProgress;
+    int maxProgress = 400;
     private DefaultedList<ItemStack> inventory;
 
     protected final PropertyDelegate propertyDelegate = new PropertyDelegate(){
@@ -256,10 +256,14 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
     }
 
     private static boolean canAcceptRecipeOutput(AlloyFurnaceBlockEntity blockEntity){
-        ItemStack input1 = blockEntity.inventory.get(0);
-        ItemStack input2 = blockEntity.inventory.get(1);
-        ItemStack output = blockEntity.inventory.get(3);
-        return output.isEmpty() || output.getMaxCount() > output.getCount() || output.getItem() == blockEntity.getRecipe(input1, input2) || output.getItem() == blockEntity.getRecipe(input2, input1);
+        if (blockEntity.inventory.get(3).getCount() < blockEntity.inventory.get(3).getMaxCount()){
+            if (blockEntity.getStack(3).isEmpty()){
+                return true;
+            }
+            return blockEntity.getStack(3).getItem() == blockEntity.getRecipe(blockEntity.getStack(0), blockEntity.getStack(1));
+        } else {
+            return false;
+        }
     }
 
     public static volatile Map<Vector<Item>, Item> recipeMap;
@@ -274,11 +278,9 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
     }
 
     public static void tick(World world, BlockPos blockPos, BlockState state, AlloyFurnaceBlockEntity blockEntity) {
-        if(blockEntity.hasValidRecipe()){
-            if (!blockEntity.isBurning()){
-                blockEntity.maxFuel = blockEntity.currentFuel = blockEntity.getFuelTime(blockEntity.inventory.get(2));
-                blockEntity.inventory.get(2).decrement(1);
-            }
+        if(blockEntity.hasValidRecipe() && AlloyFurnaceBlockEntity.canAcceptRecipeOutput(blockEntity) && !blockEntity.isBurning()){
+            blockEntity.maxFuel = blockEntity.currentFuel = blockEntity.getFuelTime(blockEntity.inventory.get(2));
+            blockEntity.inventory.get(2).decrement(1);
         }
         if(blockEntity.isBurning()){
             --blockEntity.currentFuel;
@@ -286,10 +288,20 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
             if(canAcceptRecipeOutput(blockEntity) && blockEntity.hasValidRecipe()){
                 blockEntity.currentProgress++;
                 if (blockEntity.currentProgress == blockEntity.maxProgress){
-                    blockEntity.inventory.add(3, new ItemStack(blockEntity.getRecipe(blockEntity.inventory.get(0), blockEntity.inventory.get(1))));
+                    if (blockEntity.inventory.get(3).isEmpty()){
+                        blockEntity.inventory.set(3, new ItemStack(blockEntity.getRecipe(blockEntity.inventory.get(0), blockEntity.inventory.get(1))));
+                    } else {
+                        blockEntity.inventory.get(3).increment(1);
+                    }
                     blockEntity.inventory.get(0).decrement(1);
                     blockEntity.inventory.get(1).decrement(1);
                     blockEntity.currentProgress = 0;
+                    System.out.println(blockEntity.inventory.get(3).getMaxCount());
+                    System.out.println(blockEntity.inventory.get(3).getCount());
+                }
+            } else {
+                if(blockEntity.currentProgress > 0) {
+                    --blockEntity.currentProgress;
                 }
             }
         } else {
