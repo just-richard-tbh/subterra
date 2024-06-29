@@ -1,29 +1,37 @@
 package com.subterra.screen;
 
+import com.subterra.block.entity.AlloyFurnaceBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.AbstractFurnaceScreenHandler;
+import net.minecraft.screen.ArrayPropertyDelegate;
+import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.math.MathHelper;
 
 public class AlloyFurnaceScreenHandler extends ScreenHandler {
     private final Inventory inventory;
+    private final PropertyDelegate propertyDelegate;
 
     //This constructor gets called on the client when the server wants it to open the screenHandler,
     //The client will call the other constructor with an empty Inventory and the screenHandler will automatically
     //sync this empty inventory with the inventory on the server.
     public AlloyFurnaceScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, new SimpleInventory(27));
+        this(syncId, playerInventory, new SimpleInventory(27), new ArrayPropertyDelegate(4));
     }
 
     //This constructor gets called from the BlockEntity on the server without calling the other constructor first, the server knows the inventory of the container
     //and can therefore directly provide it as an argument. This inventory will then be synced to the client.
-    public AlloyFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
+    public AlloyFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate) {
         super(ModScreenHandlers.ALLOY_FURNACE_SCREEN_HANDLER, syncId);
         checkSize(inventory, 4);
         this.inventory = inventory;
+        AbstractFurnaceScreenHandler.checkDataCount(propertyDelegate, 4);
+        this.propertyDelegate = propertyDelegate;
         //some inventories do custom logic when a player opens it.
         inventory.onOpen(playerInventory.player);
 
@@ -75,5 +83,17 @@ public class AlloyFurnaceScreenHandler extends ScreenHandler {
         }
 
         return newStack;
+    }
+
+    public float getCurrentProgress() {
+        return propertyDelegate.get(2);
+    }
+
+    public float getCurrentFuel() {
+        return propertyDelegate.get(0);
+    }
+
+    public boolean isBurning() {
+        return this.propertyDelegate.get(0) > 0;
     }
 }

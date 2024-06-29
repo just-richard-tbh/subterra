@@ -137,14 +137,14 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
 
     @Override
     protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory) {
-        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this);
+        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this, propertyDelegate);
     }
 
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
         //We provide *this* to the screenHandler as our class Implements Inventory
         //Only the Server has the Inventory at the start, this will be synced to the client in the ScreenHandler
-        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this);
+        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this, propertyDelegate);
     }
 
     @Override
@@ -243,7 +243,7 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
         DefaultedList<ItemStack> inventory = this.inventory;
         Vector<Item> itemPair = new Vector<Item>(Arrays.asList(inventory.get(0).getItem().asItem(), inventory.get(1).getItem().asItem()));
         if(AlloyFurnaceBlockEntity.createRecipes().containsKey(itemPair)) {
-            return true;
+            return AlloyFurnaceBlockEntity.createRecipes().containsKey(itemPair);
         }
         else {
             itemPair = new Vector<Item>(Arrays.asList(inventory.get(1).getItem().asItem(), inventory.get(0).getItem().asItem()));
@@ -253,6 +253,13 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
 
     private static void addRecipe(Map<Vector<Item>, Item> recipeA, Vector<Item> ingredients, Item result){
         recipeA.put(ingredients, result);
+    }
+
+    private static boolean canAcceptRecipeOutput(AlloyFurnaceBlockEntity blockEntity){
+        ItemStack input1 = blockEntity.inventory.get(0);
+        ItemStack input2 = blockEntity.inventory.get(1);
+        ItemStack output = blockEntity.inventory.get(3);
+        return output.isEmpty() || output.getMaxCount() > output.getCount() || output.getItem() == blockEntity.getRecipe(input1, input2) || output.getItem() == blockEntity.getRecipe(input2, input1);
     }
 
     public static volatile Map<Vector<Item>, Item> recipeMap;
@@ -268,12 +275,27 @@ public class AlloyFurnaceBlockEntity extends LootableContainerBlockEntity
 
     public static void tick(World world, BlockPos blockPos, BlockState state, AlloyFurnaceBlockEntity blockEntity) {
         if(blockEntity.hasValidRecipe()){
-            blockEntity.inventory.set(2, Items.BOW.getDefaultStack());
+            if (!blockEntity.isBurning()){
+                blockEntity.maxFuel = blockEntity.currentFuel = blockEntity.getFuelTime(blockEntity.inventory.get(2));
+                blockEntity.inventory.get(2).decrement(1);
+            }
         }
         if(blockEntity.isBurning()){
             --blockEntity.currentFuel;
             world.setBlockState(blockPos, state.with(LIT, true));
-        }else {
+            if(canAcceptRecipeOutput(blockEntity) && blockEntity.hasValidRecipe()){
+                blockEntity.currentProgress++;
+                if (blockEntity.currentProgress == blockEntity.maxProgress){
+                    blockEntity.inventory.add(3, new ItemStack(blockEntity.getRecipe(blockEntity.inventory.get(0), blockEntity.inventory.get(1))));
+                    blockEntity.inventory.get(0).decrement(1);
+                    blockEntity.inventory.get(1).decrement(1);
+                    blockEntity.currentProgress = 0;
+                }
+            }
+        } else {
+            if(blockEntity.currentProgress > 0) {
+                --blockEntity.currentProgress;
+            }
            world.setBlockState(blockPos, state.with(LIT, false));
         }
     }
