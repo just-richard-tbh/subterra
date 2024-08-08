@@ -1,5 +1,5 @@
 {
-	"parent": "subterra:block/big_bush.json",
+	"parent": "subterra:block/big_bush",
 	"textures": {
 		"0": "subterra:block/grape_bush",
 		"1": "subterra:block/grape_leaves",

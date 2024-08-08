@@ -1,7 +1,6 @@
 {
-  "parent": "minecraft:block/cube_column",
+  "parent": "minecraft:block/cube_all",
   "textures": {
-    "end": "subterra:block/cryslate_top",
-    "side": "subterra:block/cryslate"
+    "all": "subterra:block/cryslate"
   }
 }

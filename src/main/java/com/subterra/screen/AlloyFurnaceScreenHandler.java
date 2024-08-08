@@ -1,6 +1,5 @@
 package com.subterra.screen;
 
-import com.subterra.block.entity.AlloyFurnaceBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
